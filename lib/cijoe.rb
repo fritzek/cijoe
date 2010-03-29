@@ -48,6 +48,12 @@ class CIJoe
 
   # kill the child and exit
   def stop
+    # another build waits
+    if Config.cijoe.build_all_flag && File.exist?(Config.cijoe.build_all_file)
+      # clean out on stop
+      FileUtils.rm(Config.cijoe.build_all_file)
+    end
+
     Process.kill(9, pid) if pid
     exit!
   end
@@ -73,12 +79,29 @@ class CIJoe
     write_build 'current', @current_build
     write_build 'last', @last_build
     @last_build.notify if @last_build.respond_to? :notify
+
+    # another build waits
+    if Config.cijoe.build_all_flag && File.exist?(Config.cijoe.build_all_file)
+      build
+      # clean out after build
+      FileUtils.rm(Config.cijoe.build_all_file)
+    end
   end
 
-  # run the build but make sure only
-  # one is running at a time
+  # run the build but make sure only one is running
+  # at a time (if new one comes in we will park it)
   def build
-    return if building?
+    if building?
+      # only if switched on to build all incoming requests
+      if Config.cijoe.build_all_flag
+        # and there is no previous request
+        return if File.exist?(Config.cijoe.build_all_file)
+        # we will mark awaiting builds
+        FileUtils.touch(Config.cijoe.build_all_file)
+      end
+      # leave anyway because a current build runs
+      return
+    end
     @current_build = Build.new(@user, @project)
     write_build 'current', @current_build
     Thread.new { build! }
