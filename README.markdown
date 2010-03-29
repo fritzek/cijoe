@@ -60,13 +60,13 @@ Concurrent Push's
 -----------------
 
 Joe runs just one build at the time. If you expect concurrent push's
-to your repo and want joe to build each:
+to your repo and want joe to build each in a kind of queue:
 
     $ git config --add cijoe.buildallflag yes
     $ git config --add cijoe.buildallfile tmp/cijoe.txt
 
-Joe will save requests while another build runs. If more than one hits
-joe, he just picks the last after finishing the prior.
+Joe will save requests while another build runs. If more than one push
+hits joe, he just picks the last after finishing the prior.
 
 
 Campfire
