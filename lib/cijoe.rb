@@ -82,9 +82,9 @@ class CIJoe
 
     # another build waits
     if Config.cijoe.buildallflag && File.exist?(Config.cijoe.buildallfile.to_s)
-      build
-      # clean out after build
+      # clean out before new build
       FileUtils.rm(Config.cijoe.buildallfile.to_s)
+      build
     end
   end
 
